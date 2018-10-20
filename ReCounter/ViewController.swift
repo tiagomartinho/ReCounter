@@ -1,10 +1,14 @@
 import UIKit
 import ReSwift
 
-let mainStore = Store<AppState>(reducer: counterReducer, state: nil)
+let mainStore = Store<AppState>(reducer: counterReducer, state: AppState.initial)
 
 struct AppState: StateType {
-    var counter: Int = 0
+    let counter: Int
+}
+
+extension AppState {
+    static var initial = AppState(counter: 0)
 }
 
 enum CounterAction: Action {
@@ -12,15 +16,14 @@ enum CounterAction: Action {
 }
 
 func counterReducer(action: Action, state: AppState?) -> AppState {
-    var state = state ?? AppState()
+    guard let state = state else { return AppState.initial }
     guard let action = action as? CounterAction else { return state }
     switch action {
     case .increase:
-        state.counter += 1
+        return AppState(counter: state.counter + 1)
     case .decrease:
-        state.counter -= 1
+        return AppState(counter: state.counter - 1)
     }
-    return state
 }
 
 class ViewController: UIViewController, StoreSubscriber {
