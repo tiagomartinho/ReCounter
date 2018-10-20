@@ -1,0 +1,6 @@
+framework module Pods_ReCounter {
+  umbrella header "Pods-ReCounter-umbrella.h"
+
+  export *
+  module * { export * }
+}
