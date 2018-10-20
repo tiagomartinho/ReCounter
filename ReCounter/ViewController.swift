@@ -11,19 +11,26 @@ extension AppState {
     static var initial = AppState(counter: 0)
 }
 
-enum CounterAction: Action {
-    case increase, decrease
+protocol CounterAction: Action {
+    func apply(state: AppState) -> AppState
+}
+
+class IncreaseCounterAction: CounterAction {
+    func apply(state: AppState) -> AppState {
+        return AppState(counter: state.counter + 1)
+    }
+}
+
+class DecreaseCounterAction: CounterAction {
+    func apply(state: AppState) -> AppState {
+        return AppState(counter: state.counter - 1)
+    }
 }
 
 func counterReducer(action: Action, state: AppState?) -> AppState {
     guard let state = state else { return AppState.initial }
     guard let action = action as? CounterAction else { return state }
-    switch action {
-    case .increase:
-        return AppState(counter: state.counter + 1)
-    case .decrease:
-        return AppState(counter: state.counter - 1)
-    }
+    return action.apply(state: state)
 }
 
 class ViewController: UIViewController, StoreSubscriber {
@@ -31,10 +38,12 @@ class ViewController: UIViewController, StoreSubscriber {
     @IBOutlet var counterLabel: UILabel!
 
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         mainStore.subscribe(self)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
         mainStore.unsubscribe(self)
     }
 
@@ -43,14 +52,10 @@ class ViewController: UIViewController, StoreSubscriber {
     }
 
     @IBAction func increaseButtonTapped(_ sender: UIButton) {
-        mainStore.dispatch(
-            CounterAction.increase
-        )
+        mainStore.dispatch(IncreaseCounterAction())
     }
 
     @IBAction func decreaseButtonTapped(_ sender: UIButton) {
-        mainStore.dispatch(
-            CounterAction.decrease
-        )
+        mainStore.dispatch(DecreaseCounterAction())
     }
 }
